@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#0a0a1a">
+<title>Harmonía · Gestos — instrumento de manos</title>
+<meta name="description" content="Instrumento que se toca con las manos frente a la cámara.">
+<style>
+  :root{
+    --fondo:#0a0a1a;
+    --panel:#0f1024;
+    --borde:#232544;
+    --texto:#e8e8f4;
+    --tenue:#8b8ca8;
+    --acento:#4488ff;
+    --piso: env(safe-area-inset-bottom, 0px);
+    --techo: env(safe-area-inset-top, 0px);
+  }
+  *{box-sizing:border-box}
+  /* Sin esto, el teléfono dibuja las casillas, el desplegable y la barra con
+     los colores del tema claro sobre un fondo oscuro. */
+  html{color-scheme:dark}
+  html,body{margin:0;padding:0;overscroll-behavior-y:contain;background:var(--fondo);color:var(--texto)}
+  body{
+    font:16px/1.5 'Crimson Text',Georgia,serif;
+    padding:calc(var(--techo) + 10px) 12px calc(var(--piso) + 24px);
+    max-width:720px;margin:0 auto;
+    -webkit-text-size-adjust:100%;
+  }
+  h1{font-family:'Libre Baskerville',Georgia,serif;font-size:1.5rem;margin:0 0 2px;letter-spacing:.04em}
+  h1 .a{color:#4488ff}h1 .b{color:#cc4444}h1 .c{color:#44bb44}
+  .sub{color:var(--tenue);font-size:.85rem;font-style:italic;margin:0 0 14px}
+  a{color:var(--acento)}
+
+  .escena{
+    position:relative;width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;
+    background:#000;border:1px solid var(--borde);
+  }
+  .escena video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+  .escena canvas{position:absolute;inset:0;width:100%;height:100%}
+  .escena .tapa{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:12px;background:rgba(6,6,18,.88);text-align:center;padding:20px;
+  }
+  .escena .tapa p{color:var(--tenue);font-size:.9rem;margin:0;max-width:30ch}
+
+  button{font:inherit;color:var(--texto);background:#1a1c38;border:1px solid var(--borde);
+    border-radius:12px;padding:11px 16px;cursor:pointer;min-height:46px}
+  button:active{background:#252850}
+  button.grande{font-size:1.15rem;padding:14px 28px;background:#1e3a7a;border-color:#3a5fbf}
+  button.peligro{background:#3a1520;border-color:#7a2535}
+  button[disabled]{opacity:.45}
+
+  .lectura{
+    display:flex;align-items:center;gap:14px;margin:12px 0;padding:12px 14px;
+    background:var(--panel);border:1px solid var(--borde);border-radius:14px;
+  }
+  .lectura .nota{font-size:2rem;font-family:'Libre Baskerville',Georgia,serif;min-width:3.2em;text-align:center}
+  .lectura .datos{font-size:.8rem;color:var(--tenue);line-height:1.4}
+
+  details{background:var(--panel);border:1px solid var(--borde);border-radius:14px;margin:10px 0;padding:0 14px}
+  details[open]{padding-bottom:14px}
+  summary{cursor:pointer;padding:13px 0;font-weight:600;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸ ";color:var(--tenue)}
+  details[open] summary::before{content:"▾ "}
+
+  .campo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0}
+  .campo label{color:var(--tenue);font-size:.9rem}
+  select,input[type=text],input[type=password],input[type=number]{
+    font:inherit;background:#0a0b1c;color:var(--texto);border:1px solid var(--borde);
+    border-radius:10px;padding:9px 11px;min-height:44px;max-width:60%;flex:1
+  }
+  input[type=range]{flex:1;max-width:60%;accent-color:var(--acento)}
+  input[type=checkbox]{width:22px;height:22px;accent-color:var(--acento)}
+
+  .fila{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .fila button{flex:1;min-width:120px}
+
+  .bitacora{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;line-height:1.6;
+    background:#07081a;border:1px solid var(--borde);border-radius:10px;padding:10px;
+    max-height:160px;overflow-y:auto;color:var(--tenue);white-space:pre-wrap;word-break:break-word}
+  .bitacora .err{color:#ff8080}
+  .bitacora .ok{color:#7fd88f}
+  .bitacora .aviso{color:#ffcc66}
+
+  .nota-al-pie{color:var(--tenue);font-size:.78rem;margin-top:18px;border-top:1px solid var(--borde);padding-top:12px}
+  .nota-al-pie code{background:#12142c;padding:1px 5px;border-radius:5px;font-size:.9em}
+</style>
+</head>
+<body>
+
+<h1><span class="a">Har</span><span class="b">mo</span><span class="c">nía</span> · Gestos</h1>
+<p class="sub">Las manos frente a la cámara. La derecha toca, la izquierda acompaña y enciende.</p>
+
+<div class="escena">
+  <video id="video" playsinline muted autoplay></video>
+  <canvas id="lienzo" width="640" height="480"></canvas>
+  <div class="tapa" id="tapa">
+    <button class="grande" id="empezar">Encender la cámara</button>
+    <p id="mensajeTapa">Hace falta permiso de cámara y un toque tuyo para que el navegador deje sonar el audio. La imagen no sale del teléfono: el reconocimiento corre acá adentro.</p>
+  </div>
+</div>
+
+<div class="lectura">
+  <div class="nota" id="lecturaNota" style="color:#555">—</div>
+  <div class="datos" id="lecturaDatos">Sin cámara</div>
+</div>
+
+<div class="fila">
+  <button id="panico" class="peligro">Silencio</button>
+  <button id="intercambiar">Cambiar mano</button>
+</div>
+
+<details open>
+  <summary>La escala</summary>
+  <div class="campo"><label for="tonica">Tónica</label><select id="tonica"></select></div>
+  <div class="campo"><label for="escala">Escala</label><select id="escala"></select></div>
+  <div class="campo"><label for="octava">Octava de partida</label><input type="number" id="octava" min="1" max="6" step="1" value="3"></div>
+  <div class="campo"><label for="octavas">Cuántas octavas</label><input type="number" id="octavas" min="1" max="4" step="1" value="2"></div>
+  <div class="campo"><label for="latino">Nombres en DO RE MI</label><input type="checkbox" id="latino"></div>
+  <div class="campo"><label for="acomp">Acorde con la mano abierta</label><input type="checkbox" id="acomp" checked></div>
+  <div class="campo"><label for="afinacion">La = <span id="afinacionVal">440</span> Hz</label><input type="range" id="afinacion" min="415" max="446" step="1" value="440"></div>
+</details>
+
+<details>
+  <summary>La bitácora</summary>
+  <div class="bitacora" id="bitacora">Acá aparece lo que pasa con la cámara y el audio.</div>
+</details>
+
+<details>
+  <summary>Cómo se toca</summary>
+  <p style="font-size:.9rem;color:var(--tenue)">
+    <strong style="color:var(--texto)">Mano derecha — la melodía.</strong><br>
+    Moverla de izquierda a derecha elige la nota; las franjas de color son el teclado.
+    Juntar el pulgar con el índice hace sonar, separarlos calla. Cuanto más apretado el
+    pellizco, más vibrato. Subir la mano abre el brillo; acercarla a la cámara sube el volumen.
+  </p>
+  <p style="font-size:.9rem;color:var(--tenue)">
+    <strong style="color:var(--texto)">Mano izquierda — el acompañamiento.</strong><br>
+    Con la mano abierta suena un acorde del grado donde esté. Cerrando el puño el
+    acompañamiento calla: el punto se pone naranja para avisar que la mano está cerrada.
+  </p>
+  <p style="font-size:.9rem;color:var(--tenue)">
+    <strong style="color:var(--texto)">Si las manos salen cambiadas</strong>, tocá «Cambiar mano».
+    La cámara frontal invierte la imagen y el modelo no siempre acierta de qué lado está cada una.
+  </p>
+</details>
+
+<p class="nota-al-pie">
+  Nada de esto sube fotos ni video a ningún lado: <code>MediaPipe</code> corre entero en el
+  navegador, y el instrumento no le habla a ningún servidor: no hay nada que salga del
+  teléfono. La documentación está en <code>GESTOS.md</code>.
+  · <a href="./">Volver a Harmonía</a>
+</p>
+
+<!-- Ruta RELATIVA a propósito: `/gestos/…` sólo resuelve si la página vive
+     en la raíz de un dominio. Así anda igual ahí y en un GitHub Pages de
+     proyecto (usuario.github.io/repo/), que es donde se puede probar sin
+     depender de la cuenta de Vercel que nadie sabe cuál es (harmonia:H1). -->
+<script type="module" src="./gestos/pagina.js"></script>
+</body>
+</html>

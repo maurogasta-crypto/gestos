@@ -1,0 +1,45 @@
+# Publica el instrumento de gestos en GitHub Pages.
+#
+# POR QUÉ EXISTE, si este proyecto no quería workflows propios: GitHub no
+# dispara compilaciones a partir de push hechos por una app de GitHub —es su
+# protección contra bucles—, y todos los push de un agente son de esa clase.
+# Con la publicación «desde una rama», el panel se quedó clavado en la tanda 1
+# mientras el repositorio ya iba por la cuarta. Este archivo evita repetir ese
+# error acá: es `general:llevar-no-reinventar` aplicado el día uno, en vez de
+# descubrirlo cuando una tanda no llegue al teléfono y nadie entienda por qué.
+#
+# Requiere que Pages esté en Settings → Pages → Source: GitHub Actions.
+# No usa ningún secreto: el token lo da GitHub para esta corrida.
+
+name: Publicar los gestos
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # para que un agente pueda pedirlo después de subir
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Una publicación por vez; si entra otra, la que está en cola se descarta.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      # El sitio es la raíz tal cual: no hay build, y no tiene que haberlo.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
