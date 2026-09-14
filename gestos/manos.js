@@ -8,7 +8,7 @@
 // MediaPipe llega por CDN como módulo ES. No hay npm ni build en esta página.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const VERSION = "gestos-manos 1.1";
+export const VERSION = "gestos-manos 1.2";
 
 const CDN    = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const BUNDLE = `${CDN}/vision_bundle.mjs`;
@@ -18,7 +18,7 @@ const MODELO = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/
 // MediaPipe se carga cuando se enciende la cámara, no cuando se abre la
 // página. Con un `import` arriba de todo, un CDN que no contesta —un ascensor,
 // un tren, una red que filtra— dejaba la página entera muerta y en blanco: ni
-// los ajustes, ni la clave de la sala, ni un mensaje. Ahora lo que falla es el
+// los ajustes, ni la bitácora, ni un mensaje. Ahora lo que falla es el
 // encendido, y lo dice.
 let mediapipe = null;
 async function cargarMediapipe() {

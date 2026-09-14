@@ -1,14 +1,18 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // instrumento.js — Donde el gesto se vuelve nota, y la nota se vuelve orden
 //
-// Este archivo es el único que sabe al mismo tiempo de manos, de sonido y de
-// luces. Los otros tres no se conocen entre sí, a propósito: se puede cambiar
-// el motor de audio sin tocar la cámara, y probar la cámara sin que suene nada.
+// Este archivo es el único que sabe al mismo tiempo de manos y de sonido. Los
+// otros dos no se conocen entre sí, a propósito: se puede cambiar el motor de
+// audio sin tocar la cámara, y probar la cámara sin que suene nada.
+//
+// Hasta el 2026-09-09 esta línea decía «y de luces»: el instrumento también
+// hablaba con `iot.js`, el cliente del puente a Tuya. Ese puente se retiró
+// (`harmonia:H3`) y acá no quedó nada de él.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { rejilla, zonaDe, colorDe, etiquetaDe, nombreDe, acordeDeGrado, ESCALAS } from "./musica.js";
 
-export const VERSION = "gestos-instrumento 2.0";
+export const VERSION = "gestos-instrumento 2.1";
 
 // Umbrales del pellizco, con histéresis. Dos números y no uno: con uno solo,
 // la nota parpadea justo en el borde, que es exactamente donde la mano se
@@ -23,7 +27,6 @@ export const AJUSTES_POR_DEFECTO = {
   escala: "pentaMenor",
   octavas: 2,
   latino: false,
-  // IoT
   acompanamiento: true,
 };
 
