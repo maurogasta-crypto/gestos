@@ -31,6 +31,29 @@ enum class Lado { IZQUIERDA, DERECHA;
     val otro get() = if (this == IZQUIERDA) DERECHA else IZQUIERDA
 }
 
+// Qué mano es cuál, por DÓNDE está en la pantalla y no por lo que adivina el
+// modelo (gestos-apk-2, 18-oct-2026). MediaPipe dice «Left» o «Right» mirando
+// la forma de la mano, y con la cámara frontal, una mano de canto o un
+// movimiento rápido se equivoca: la primera prueba de Mauro salió con la nota
+// en la mano derecha. La pantalla es un espejo, así que la mano que se ve a la
+// izquierda ES la izquierda. Con dos manos manda el orden; con una, el lado.
+// «Manos cambiadas» da vuelta el resultado, para quien toque cruzado.
+object Repartir {
+    fun porLado(manos: List<Mano>, cambiadas: Boolean): ManosDelCuadro {
+        var izq: Mano? = null
+        var der: Mano? = null
+        when {
+            manos.size >= 2 -> {
+                // Si hay más de dos, las dos más grandes: son las que tocan.
+                val dos = manos.sortedByDescending { it.palmo }.take(2).sortedBy { it.x }
+                izq = dos[0]; der = dos[1]
+            }
+            manos.size == 1 -> if (manos[0].x < 0.5) izq = manos[0] else der = manos[0]
+        }
+        return if (cambiadas) ManosDelCuadro(der, izq) else ManosDelCuadro(izq, der)
+    }
+}
+
 object LeerMano {
     private const val MUNECA = 0
     private const val PULGAR = 4

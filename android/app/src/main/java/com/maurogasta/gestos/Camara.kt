@@ -43,7 +43,7 @@ class Camara(
     private val alCuadro: (ManosDelCuadro, Long) -> Unit,
     private val alError: (String) -> Unit,
 ) {
-    @Volatile var intercambiar = true
+    @Volatile var cambiadas = false
     @Volatile var fps = 0; private set
     @Volatile var msReconocer = 0; private set
     @Volatile var delegado = "—"; private set
@@ -51,6 +51,44 @@ class Camara(
     @Volatile var rangoFps = "—"; private set
 
     private var landmarker: HandLandmarker? = null
+
+    // ── GPU o CPU: se MIDE, no se supone (gestos-apk-2) ──────────────────────
+    // La primera prueba en un Redmi dio 85 ms por cuadro en la GPU: en una gama
+    // media, la CPU puede ganarle a la GPU con este modelo. Al encender se
+    // miden las dos —PRUEBA cuadros cada una, después de CALENTAR— y se queda
+    // la más rápida. Son unos segundos, y la lectura en vivo los muestra.
+    private companion object { const val CALENTAR = 8; const val PRUEBA = 40 }
+    @Volatile private var pedido: Delegate? = null
+    private var actual = Delegate.GPU
+    private var contados = 0
+    private var suma = 0L
+    private val medido = mutableMapOf<Delegate, Int>()
+    @Volatile var eleccion = "midiendo…"; private set
+
+    private fun medir(ms: Long) {
+        if (medido.size == 2 || pedido != null) return
+        contados++
+        if (contados <= CALENTAR) return
+        suma += ms
+        if (contados < CALENTAR + PRUEBA) return
+        medido[actual] = (suma / PRUEBA).toInt()
+        val otro = if (actual == Delegate.GPU) Delegate.CPU else Delegate.GPU
+        if (otro !in medido) { pedido = otro; return }
+        val mejor = medido.minBy { it.value }.key
+        eleccion = medido.entries.joinToString(" / ") { "${if (it.key == Delegate.GPU) "GPU" else "CPU"} ${it.value} ms" }
+        if (mejor != actual) pedido = mejor
+    }
+
+    // Lo cambia el hilo del análisis, entre dos cuadros: nunca con un cuadro adentro.
+    private fun cambiarSiHaceFalta() {
+        val d = pedido ?: return
+        pedido = null
+        landmarker?.close()
+        landmarker = try { crearLandmarker(d) } catch (e: Exception) { crearLandmarker(Delegate.CPU) }
+        actual = d
+        delegado = if (d == Delegate.GPU) "GPU" else "CPU"
+        contados = 0; suma = 0
+    }
     private val hilo = Executors.newSingleThreadExecutor()
     private val suaves = mapOf(
         Lado.IZQUIERDA to (Suavizador() to Suavizador()),
@@ -80,9 +118,10 @@ class Camara(
 
     fun arrancar(dueno: LifecycleOwner, vista: PreviewView) {
         landmarker = try {
-            crearLandmarker(Delegate.GPU).also { delegado = "GPU" }
+            crearLandmarker(Delegate.GPU).also { delegado = "GPU"; actual = Delegate.GPU }
         } catch (e: Exception) {
-            crearLandmarker(Delegate.CPU).also { delegado = "CPU" }
+            // Sin GPU no hay nada que comparar.
+            crearLandmarker(Delegate.CPU).also { delegado = "CPU"; actual = Delegate.CPU; medido[Delegate.GPU] = Int.MAX_VALUE }
         }
         val futuro = ProcessCameraProvider.getInstance(contexto)
         futuro.addListener({
@@ -136,6 +175,7 @@ class Camara(
                     Bitmap.createBitmap(cruda, 0, 0, cruda.width, cruda.height, giro, true)
                 }
                 resolucion = "${derecha.width}×${derecha.height}"
+                cambiarSiHaceFalta()
                 // El reloj de MediaPipe tiene que crecer siempre, aunque dos
                 // cuadros lleguen en el mismo milisegundo.
                 val ts = maxOf(SystemClock.uptimeMillis(), ultimoTs + 1)
@@ -154,23 +194,18 @@ class Camara(
 
     private fun resultado(r: HandLandmarkerResult) {
         val ahora = SystemClock.uptimeMillis()
-        msReconocer = ((msReconocer * 9 + (ahora - r.timestampMs()).toInt()) / 10)
+        val ms = ahora - r.timestampMs()
+        msReconocer = ((msReconocer * 9 + ms.toInt()) / 10)
+        medir(ms)
         cuadros++
         if (ahora - tFps > 500) { fps = (cuadros * 1000 / (ahora - tFps)).toInt(); cuadros = 0; tFps = ahora }
 
-        var izq: Mano? = null
-        var der: Mano? = null
-        for (i in r.landmarks().indices) {
-            val cat = r.handedness().getOrNull(i)?.firstOrNull()?.categoryName() ?: "Right"
-            var lado = if (cat == "Left") Lado.IZQUIERDA else Lado.DERECHA
-            if (intercambiar) lado = lado.otro
-            // La cámara frontal se ve espejada en pantalla: x → 1 − x, y la
-            // mano queda donde uno la ve.
-            val puntos = r.landmarks()[i].map { Punto(1.0 - it.x(), it.y().toDouble()) }
-            val m = LeerMano.leer(puntos)
-            if (lado == Lado.IZQUIERDA) { if (izq == null || m.palmo > izq.palmo) izq = m }
-            else { if (der == null || m.palmo > der.palmo) der = m }
-        }
+        // La cámara frontal se ve espejada en pantalla: x → 1 − x, y la mano
+        // queda donde uno la ve. Qué mano es cuál lo decide el lado (Repartir).
+        val leidas = r.landmarks().map { lm -> LeerMano.leer(lm.map { Punto(1.0 - it.x(), it.y().toDouble()) }) }
+        val reparto = Repartir.porLado(leidas, cambiadas)
+        val izq = reparto.izquierda
+        val der = reparto.derecha
         fun suavizar(m: Mano?, lado: Lado): Mano? {
             val (sx, sy) = suaves.getValue(lado)
             if (m == null) { sx.olvidar(); sy.olvidar(); return null }

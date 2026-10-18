@@ -172,4 +172,22 @@ class GestosTest {
         repeat(200) { voz.render(buf, buf.size) }
         assertTrue("sigue sonando con nivel 0", buf.all { abs(it) < 1e-3 })
     }
+
+    // ── Qué mano es cuál: por el lado de la pantalla ────────────────────────
+    @Test fun lasManosSeRepartenPorElLado() {
+        val a = mano(0.7, 0.5); val b = mano(0.2, 0.4)
+        val r = Repartir.porLado(listOf(a, b), cambiadas = false)
+        assertTrue(r.izquierda === b && r.derecha === a)
+        val c = Repartir.porLado(listOf(a, b), cambiadas = true)
+        assertTrue(c.izquierda === a && c.derecha === b)
+        // Una sola mano: el lado de la pantalla donde está.
+        assertTrue(Repartir.porLado(listOf(b), false).izquierda === b)
+        assertTrue(Repartir.porLado(listOf(a), false).derecha === a)
+        // Tres manos (alguien atrás): tocan las dos más grandes.
+        val lejos = mano(0.5, 0.5, palmo = 0.05)
+        val t = Repartir.porLado(listOf(lejos, a, b), false)
+        assertTrue(t.izquierda === b && t.derecha === a)
+        val nada = Repartir.porLado(emptyList(), false)
+        assertNull(nada.izquierda); assertNull(nada.derecha)
+    }
 }

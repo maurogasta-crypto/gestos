@@ -11,7 +11,7 @@
 // idea del bandoneón de src/audio/engine.js, aligerada para tiempo real.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { frecuenciaDe } from "./musica.js?v=3.2";
+import { frecuenciaDe } from "./musica.js?v=3.3";
 
 export const VERSION = "gestos-audio 1.3";
 

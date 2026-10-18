@@ -5,21 +5,22 @@
 // que el instrumento devuelve. Ninguna decisión musical vive acá.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { crearMotor } from "./audio.js?v=3.2";
-import { crearRastreador } from "./manos.js?v=3.2";
+import { crearMotor } from "./audio.js?v=3.3";
+import { crearRastreador } from "./manos.js?v=3.3";
 // El «?v=» de cada import es para el teléfono, no para el código: Pages deja
 // cada módulo diez minutos en la caché, y el 18-oct-2026 Mauro probó la 3.0
 // con la 2.1 todavía adentro. Al cambiar un módulo, sube el «?v=» en TODOS los
 // imports de public/gestos/ y en gestos.html, o se mezclan versiones.
-import { crearInstrumento, VERSION as VERSION_INSTRUMENTO } from "./instrumento.js?v=3.2";
-import { CROMATICA, ESCALAS, LATINO } from "./musica.js?v=3.2";
+import { crearInstrumento, VERSION as VERSION_INSTRUMENTO } from "./instrumento.js?v=3.3";
+import { CROMATICA, ESCALAS, LATINO } from "./musica.js?v=3.3";
 
-export const VERSION = "gestos-pagina 3.2";
+export const VERSION = "gestos-pagina 3.3";
 
 const $ = (id) => document.getElementById(id);
 
 // El sello a la vista: es lo que dice qué versión quedó en el teléfono.
-document.getElementById("sello").textContent = VERSION_INSTRUMENTO;
+// Es el de esta página, que sube en cada tanda de la página (desde la 3.3).
+document.getElementById("sello").textContent = `${VERSION} · ${VERSION_INSTRUMENTO}`;
 const AJUSTES_GUARDADOS = "harmonia_gestos_ajustes_v1";
 
 const video = $("video");
@@ -138,7 +139,7 @@ $("empezar").addEventListener("click", async () => {
     const estado = await motor.despertar();
     if (estado !== "running") anotar("aviso", "el audio quedó suspendido; tocá otra vez");
 
-    rastreador = crearRastreador({ video, intercambiarManos: true, espejo: true });
+    rastreador = crearRastreador({ video, cambiadas: false, espejo: true });
     instrumento = crearInstrumento({ video, canvas: lienzo, motor, alEstado: mostrar });
     aplicar();
 
@@ -169,8 +170,8 @@ $("empezar").addEventListener("click", async () => {
 $("panico").addEventListener("click", () => { if (instrumento) instrumento.panico(); });
 $("intercambiar").addEventListener("click", () => {
   if (!rastreador) return;
-  rastreador.intercambiar = !rastreador.intercambiar;
-  anotar("aviso", `manos ${rastreador.intercambiar ? "intercambiadas" : "sin intercambiar"}`);
+  rastreador.cambiadas = !rastreador.cambiadas;
+  anotar("aviso", `manos ${rastreador.cambiadas ? "cambiadas: la nota del lado derecho de la pantalla" : "como se ven"}`);
 });
 
 // Al irse de la página o apagar la pantalla, callar. Un instrumento que sigue

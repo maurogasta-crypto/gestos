@@ -8,7 +8,7 @@
 // MediaPipe llega por CDN como módulo ES. No hay npm ni build en esta página.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const VERSION = "gestos-manos 1.4";
+export const VERSION = "gestos-manos 1.5";
 
 const CDN    = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const BUNDLE = `${CDN}/vision_bundle.mjs`;
@@ -95,13 +95,31 @@ function leerMano(puntos) {
 }
 
 // ─── Rastreador ──────────────────────────────────────────────────────────────
+// Qué mano es cuál, por DÓNDE está en la pantalla y no por lo que adivina el
+// modelo (gestos-manos 1.5, 18-oct-2026). MediaPipe dice «Left» o «Right»
+// mirando la forma de la mano, y con la cámara frontal, una mano de canto o un
+// movimiento rápido se equivoca: la primera prueba de la APK salió con la nota
+// en la mano derecha. La pantalla es un espejo, así que la mano que se ve a la
+// izquierda ES la izquierda. Con dos manos manda el orden; con una, el lado.
+// `lista` lleva la x ya en coordenadas de pantalla. Igual que `Repartir` de la APK.
+export function repartirPorLado(lista, cambiadas = false) {
+  let izquierda = null, derecha = null;
+  if (lista.length >= 2) {
+    // Si hay más de dos, las dos más grandes: son las que tocan.
+    const dos = [...lista].sort((a, b) => b.palmo - a.palmo).slice(0, 2).sort((a, b) => a.x - b.x);
+    [izquierda, derecha] = dos;
+  } else if (lista.length === 1) {
+    if (lista[0].x < 0.5) izquierda = lista[0]; else derecha = lista[0];
+  }
+  return cambiadas ? { izquierda: derecha, derecha: izquierda } : { izquierda, derecha };
+}
+
 export function crearRastreador({
   video,
-  // MediaPipe etiqueta las manos como si la imagen estuviera espejada. Con la
-  // cámara frontal y el cuadro sin espejar, sale al revés — por eso es una
-  // opción y no una constante: se comprueba mirando la pantalla, no leyendo
-  // la documentación.
-  intercambiarManos = true,
+  // «Manos cambiadas»: da vuelta el reparto por lado, para quien toque cruzado.
+  // Hasta gestos-manos 1.4 era `intercambiarManos = true` y daba vuelta lo que
+  // adivinaba el modelo.
+  cambiadas = false,
   espejo = true,
 } = {}) {
   let landmarker = null;
@@ -175,18 +193,10 @@ export function crearRastreador({
       // retraso que sale del teléfono y no de la cámara ni del audio.
       msReconocer = msReconocer * 0.9 + (performance.now() - t) * 0.1;
 
-      const manos = { derecha: null, izquierda: null };
-      if (res && res.landmarks) {
-        for (let i = 0; i < res.landmarks.length; i++) {
-          const cat = res.handedness?.[i]?.[0]?.categoryName || "Right";
-          let lado = cat === "Left" ? "izquierda" : "derecha";
-          if (intercambiarManos) lado = lado === "izquierda" ? "derecha" : "izquierda";
-          const m = leerMano(res.landmarks[i]);
-          // Si el mismo lado aparece dos veces, gana la mano más grande: es la
-          // que está más cerca de la cámara, o sea la que está tocando.
-          if (!manos[lado] || m.palmo > manos[lado].palmo) manos[lado] = m;
-        }
-      }
+      const leidas = (res && res.landmarks ? res.landmarks : []).map(leerMano);
+      // El reparto mira la x como se ve en pantalla (espejada).
+      const manos = repartirPorLado(leidas.map(m => ({ m, x: espejo ? 1 - m.x : m.x, palmo: m.palmo })), cambiadas);
+      for (const lado of ["derecha", "izquierda"]) if (manos[lado]) manos[lado] = manos[lado].m;
 
       for (const lado of ["derecha", "izquierda"]) {
         const m = manos[lado];
@@ -233,8 +243,8 @@ export function crearRastreador({
       const s = video.srcObject;
       if (s) { s.getTracks().forEach(p => p.stop()); video.srcObject = null; }
     },
-    set intercambiar(v) { intercambiarManos = !!v; },
-    get intercambiar() { return intercambiarManos; },
+    set cambiadas(v) { cambiadas = !!v; },
+    get cambiadas() { return cambiadas; },
     get fps() { return fps; },
     get delegado() { return delegado; },
     get msReconocer() { return Math.round(msReconocer); },

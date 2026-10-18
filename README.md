@@ -24,7 +24,7 @@ Sin las dos manos a la vista no suena. Desde el 18-oct-2026; hasta entonces la
 derecha caía en franjas y la izquierda sostenía un acorde (`GESTOS.md` de
 Harmonía, § 2).
 
-Si las manos salen cambiadas, «Manos cambiadas»: la cámara frontal invierte la
+Qué mano es cuál lo decide el lado de la pantalla donde se ve; «Manos cambiadas» lo da vuelta: la cámara frontal invierte la
 imagen y el modelo no siempre acierta de qué lado está cada una.
 
 ## La APK nativa
@@ -71,7 +71,7 @@ archivo que `public/gestos.html`, con otro nombre porque acá es la portada.
 > administrar el proyecto cuando algo falle. Es `harmonia:H1` en el panel.
 
 **Ojo, desde el 18-oct-2026:** el theremin entró en la copia de Mauro de
-Harmonía, `maurogasta-crypto/harmonia` (con su banco, 20 casos), y no en
+Harmonía, `maurogasta-crypto/harmonia` (con su banco, 21 casos), y no en
 `toromboto/harmonia`, al que esta sesión no llega. Hasta que entre allá con un
 pull request desde esa copia, la de toromboto toca por notas.
 

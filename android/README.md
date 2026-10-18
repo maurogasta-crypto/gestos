@@ -20,20 +20,22 @@ Igual que la página (gestos-instrumento 3.2):
 | Acercar o alejar | nada, a propósito |
 
 En «Ajustes» se elige qué mano da la nota, la tónica, la escala (las líneas
-marcadas), las octavas y el imán. Si las manos salen al revés, «Manos
-cambiadas».
+marcadas), las octavas y el imán. **Qué mano es cuál lo decide el lado de la
+pantalla** donde se ve (`Repartir.porLado`, desde gestos-apk-2), no la
+etiqueta del modelo, que con la cámara frontal se equivoca; «Manos
+cambiadas» da vuelta ese reparto.
 
 ## Dónde se gana el tiempo, y cómo se ve
 
 | | La página | La APK |
 |---|---|---|
 | Cámara | lo que dé el navegador (30 cuadros) | el rango más alto que admite la cámara frontal (`Camara.mejorRango`) |
-| Reconocimiento | MediaPipe en WebAssembly | MediaPipe nativo, en la GPU con la CPU de respaldo |
+| Reconocimiento | MediaPipe en WebAssembly | MediaPipe nativo. **Al encender mide la GPU y la CPU y se queda con la más rápida** (gestos-apk-2): la primera prueba dio 85 ms por cuadro en la GPU de un Redmi, y en una gama media la CPU puede ganarle |
 | Sonido | Web Audio: 40–100 ms en Chrome para Android | `AudioTrack` de baja latencia, con la tasa y la ráfaga nativas, búfer de dos ráfagas que crece sólo si el teléfono no da abasto |
 | El deslizamiento del tono | una rampa por cuadro | muestra por muestra, en el hilo del audio |
 
 La línea gris debajo de la nota dice cada parte: cuadros por segundo, cuánto
-tarda el reconocimiento (y si es GPU o CPU), el búfer de audio en ms, la
+tarda el reconocimiento (con qué, y lo que midió cada uno: «GPU 85 ms / CPU 40 ms»), el búfer de audio en ms, la
 resolución y el rango de cuadros de la cámara. Con esos números se sabe qué
 sigue.
 
@@ -58,7 +60,7 @@ sigue.
 ANDROID_HOME=/opt/sdk ./gradlew test assembleRelease lintRelease
 ```
 
-Doce pruebas (`GestosTest.kt`): la teoría, el instrumento, el suavizado y que
+Trece pruebas (`GestosTest.kt`): la teoría, el instrumento, el suavizado y que
 la voz se deslice sin escalones. El modelo de manos (`hand_landmarker.task`,
 el mismo de la página) lo baja Gradle la primera vez y no se versiona.
 

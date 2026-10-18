@@ -29,7 +29,7 @@
 
 import {
   rejilla, midiDe, colorDe, etiquetaDe, alturaDe, posicionDe, imanar, afinacionDe, LATINO, nombreDe,
-} from "./musica.js?v=3.2";
+} from "./musica.js?v=3.3";
 
 export const VERSION = "gestos-instrumento 3.2";
 

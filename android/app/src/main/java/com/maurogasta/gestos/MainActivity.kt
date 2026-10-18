@@ -56,7 +56,9 @@ class MainActivity : ComponentActivity() {
         sinte.voz.afinacionLa = 440.0
         armarPantalla()
         camara = Camara(this, ::cuadro) { e -> error = e }
-        camara.intercambiar = getSharedPreferences(Preferencias.ARCHIVO, MODE_PRIVATE).getBoolean("intercambiar", true)
+        // «cambiadas» y no «intercambiar»: desde gestos-apk-2 las manos se
+        // reparten por lado, y el «intercambiar» guardado decía otra cosa.
+        camara.cambiadas = getSharedPreferences(Preferencias.ARCHIVO, MODE_PRIVATE).getBoolean("cambiadas", false)
     }
 
     private fun armarPantalla() {
@@ -95,8 +97,8 @@ class MainActivity : ComponentActivity() {
             .also { fila.addView(it, LinearLayout.LayoutParams(0, -2, 1f)) }
         boton("Silencio") { instrumento.silencio() }
         boton("Manos cambiadas") {
-            camara.intercambiar = !camara.intercambiar
-            getSharedPreferences(Preferencias.ARCHIVO, MODE_PRIVATE).edit().putBoolean("intercambiar", camara.intercambiar).apply()
+            camara.cambiadas = !camara.cambiadas
+            getSharedPreferences(Preferencias.ARCHIVO, MODE_PRIVATE).edit().putBoolean("cambiadas", camara.cambiadas).apply()
         }
         boton("Ajustes") { mostrarAjustes() }
         raiz.addView(fila)
@@ -137,7 +139,7 @@ class MainActivity : ComponentActivity() {
             val partes = mutableListOf(
                 if (e.nivel > 0.02) "sonando · volumen ${(Math.sqrt(e.nivel) * 100).toInt()} %" else "en silencio",
                 "${camara.fps} cuadros/s",
-                "reconoce ${camara.msReconocer} ms (${camara.delegado})",
+                "reconoce ${camara.msReconocer} ms (${camara.delegado}; ${camara.eleccion})",
                 "audio ${sinte.latenciaMs} ms",
                 "cámara ${camara.resolucion} · ${camara.rangoFps}",
             )
