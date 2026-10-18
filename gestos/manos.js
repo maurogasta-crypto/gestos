@@ -8,7 +8,7 @@
 // MediaPipe llega por CDN como módulo ES. No hay npm ni build en esta página.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const VERSION = "gestos-manos 1.3";
+export const VERSION = "gestos-manos 1.4";
 
 const CDN    = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const BUNDLE = `${CDN}/vision_bundle.mjs`;
@@ -109,6 +109,7 @@ export function crearRastreador({
   let ultimoT = -1;
   let onCuadro = null;
   let fps = 0, tFps = 0, cuadros = 0;
+  let delegado = null, msReconocer = 0;
 
   // beta 3 en la posición, desde gestos-manos 1.3 (18-oct-2026). Con 0,02
   // el filtro casi no se abría al mover la mano —la velocidad va en pantallas
@@ -122,6 +123,7 @@ export function crearRastreador({
     const { FilesetResolver, HandLandmarker } = await cargarMediapipe();
     const vision = await FilesetResolver.forVisionTasks(WASM);
     try {
+      delegado = "GPU";
       landmarker = await HandLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: MODELO, delegate: "GPU" },
         runningMode: "VIDEO",
@@ -133,6 +135,7 @@ export function crearRastreador({
     } catch (e) {
       // Sin GPU disponible (pasa en algunos Android y en modo ahorro) cae a
       // CPU: anda más lento pero anda.
+      delegado = "CPU";
       landmarker = await HandLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: MODELO, delegate: "CPU" },
         runningMode: "VIDEO",
@@ -146,9 +149,12 @@ export function crearRastreador({
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: "user",
-        width: { ideal: 640 },
-        height: { ideal: 480 },
-        frameRate: { ideal: 30 },
+        // 480×360 y hasta 60 cuadros (gestos-manos 1.4): el modelo achica la
+        // imagen a 224 igual, así que más píxeles son sólo tiempo de subirla;
+        // y cada cuadro de más es retraso de menos, si la cámara lo da.
+        width: { ideal: 480 },
+        height: { ideal: 360 },
+        frameRate: { ideal: 60 },
       },
       audio: false,
     });
@@ -165,6 +171,9 @@ export function crearRastreador({
       ultimoT = video.currentTime;
       let res = null;
       try { res = landmarker.detectForVideo(video, t); } catch (e) { res = null; }
+      // Cuánto tarda el modelo en cada cuadro, promediado: es la parte del
+      // retraso que sale del teléfono y no de la cámara ni del audio.
+      msReconocer = msReconocer * 0.9 + (performance.now() - t) * 0.1;
 
       const manos = { derecha: null, izquierda: null };
       if (res && res.landmarks) {
@@ -198,8 +207,14 @@ export function crearRastreador({
 
       if (onCuadro) onCuadro(manos, { t, fps });
     }
-    requestAnimationFrame(bucle);
+    pedirCuadro();
   }
+
+  // Con requestVideoFrameCallback el bucle corre cuando LLEGA un cuadro de la
+  // cámara, no cuando toca repintar la pantalla: con requestAnimationFrame
+  // cada cuadro esperaba hasta 16 ms sin que nadie lo mirara.
+  const pedirCuadro = () =>
+    video.requestVideoFrameCallback ? video.requestVideoFrameCallback(bucle) : requestAnimationFrame(bucle);
 
   return {
     VERSION,
@@ -211,7 +226,7 @@ export function crearRastreador({
       await abrirCamara();
       corriendo = true;
       tFps = performance.now();
-      requestAnimationFrame(bucle);
+      pedirCuadro();
     },
     detener() {
       corriendo = false;
@@ -221,6 +236,8 @@ export function crearRastreador({
     set intercambiar(v) { intercambiarManos = !!v; },
     get intercambiar() { return intercambiarManos; },
     get fps() { return fps; },
+    get delegado() { return delegado; },
+    get msReconocer() { return Math.round(msReconocer); },
     get activo() { return corriendo; },
   };
 }

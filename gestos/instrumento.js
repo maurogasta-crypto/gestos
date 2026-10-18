@@ -9,6 +9,11 @@
 // mano da la ALTURA, continua y con todo el cromatismo, y la otra el VOLUMEN.
 // Lo pidió Mauro: «la mano izquierda o derecha hace la nota y la otra mano
 // hace el volumen, y el pasaje en la pantalla continuo y no cortado por nota».
+// Y desde la 3.2 la izquierda es la nota por defecto, el tono se DESLIZA de
+// un cuadro de cámara al siguiente en vez de saltar, y acercar la mano a la
+// cámara ya no cambia nada: movía el brillo, y un filtro que se abre se oye
+// como más volumen. Mauro: «no debería cambiar el volumen por acercar o
+// alejar la mano».
 // Desde la 3.1 (el mismo día) las dos manos trabajan de ARRIBA A ABAJO:
 // «la mano derecha tiene que subir y bajar el tono, ambas subiendo y bajando
 // las manos». Subir la mano de la nota es subir la nota; la 3.0 la leía de
@@ -24,9 +29,9 @@
 
 import {
   rejilla, midiDe, colorDe, etiquetaDe, alturaDe, posicionDe, imanar, afinacionDe, LATINO, nombreDe,
-} from "./musica.js?v=3.1";
+} from "./musica.js?v=3.2";
 
-export const VERSION = "gestos-instrumento 3.1";
+export const VERSION = "gestos-instrumento 3.2";
 
 // El pellizco de la mano de la altura ya no hace sonar: da vibrato. Cuanto más
 // apretado, más tiembla — el instrumento responde a la presión, no sólo a la
@@ -53,7 +58,7 @@ export const AJUSTES_POR_DEFECTO = {
   escala: "pentaMenor",   // ya no corta el sonido: marca las guías y es a donde tira el imán
   octavas: 2,
   latino: false,
-  manoNota: "derecha",    // la otra mano es la del volumen
+  manoNota: "izquierda",  // la otra mano es la del volumen
   iman: 0,                // 0 = glissando puro, 1 = por notas
 };
 
@@ -65,6 +70,7 @@ export function crearInstrumento({ video, canvas, motor, ajustes = {}, alEstado 
   let altura = null;        // MIDI con decimales, o null si no hay mano
   let nivel = 0;
   let ultimo = { fps: 0 };
+  let tAnterior = null;     // cuándo llegó el cuadro anterior, para la rampa
 
   const recalcular = () => {
     base = midiDe(cfg.tonica, cfg.octava);
@@ -72,6 +78,9 @@ export function crearInstrumento({ video, canvas, motor, ajustes = {}, alEstado 
     guias = rejilla(cfg);
   };
   recalcular();
+  // El brillo queda fijo. Lo movía la mano (la altura en la 3.0, la cercanía
+  // en la 3.1) y cualquiera de las dos se oía como volumen que nadie pidió.
+  motor.brillo(0.65);
 
   const ladoVolumen = () => (cfg.manoNota === "izquierda" ? "derecha" : "izquierda");
   const sonando = () => nivel > 0.02;
@@ -94,22 +103,24 @@ export function crearInstrumento({ video, canvas, motor, ajustes = {}, alEstado 
   // ── Un cuadro de cámara ──────────────────────────────────────────────────
   function cuadro(manos, info) {
     ultimo = { fps: info.fps };
+    // La rampa del tono dura lo que tardó este cuadro, entre 15 y 90 ms: más
+    // corta, vuelve la escalera; más larga, es retraso puro.
+    const dura = tAnterior === null ? 0.03 : Math.max(0.015, Math.min(0.09, (info.t - tAnterior) / 1000));
+    tAnterior = info.t;
     const mn = manos[cfg.manoNota], mv = manos[ladoVolumen()];
-    tocar(mn, mv);
+    tocar(mn, mv, dura);
     dibujar(manos, mn, mv);
     avisar();
   }
 
-  function tocar(mn, mv) {
+  function tocar(mn, mv, dura = 0.03) {
     if (mn) {
       // La altura se mueve aunque no suene: así, cuando la otra mano abre el
       // volumen, entra ya en la nota a la que se apuntó, sin un glissando
       // desde la última que sonó.
       // 1 − y: en la imagen la y crece hacia abajo, y subir la mano es subir la nota.
       altura = imanar(alturaDe(1 - mn.y, base, semitonos), guias, cfg.iman);
-      motor.altura(altura);
-      // El brillo pasó a la cercanía: la altura de la mano ya es la nota.
-      motor.brillo(mn.cercania ?? 0.5);
+      motor.altura(altura, dura);
       const presion = Math.max(0, Math.min(1, (PELLIZCO_VIBRATO - mn.pellizco) / 0.45));
       motor.vibrato(presion * 0.8);
     } else {
@@ -210,6 +221,9 @@ export function crearInstrumento({ video, canvas, motor, ajustes = {}, alEstado 
     ajustar(parcial) {
       Object.assign(cfg, parcial);
       recalcular();
+  // El brillo queda fijo. Lo movía la mano (la altura en la 3.0, la cercanía
+  // en la 3.1) y cualquiera de las dos se oía como volumen que nadie pidió.
+  motor.brillo(0.65);
       nivel = 0; motor.nivel(0);
     },
     get ajustes() { return { ...cfg }; },

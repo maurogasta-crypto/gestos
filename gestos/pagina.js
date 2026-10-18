@@ -5,16 +5,16 @@
 // que el instrumento devuelve. Ninguna decisión musical vive acá.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { crearMotor } from "./audio.js?v=3.1";
-import { crearRastreador } from "./manos.js?v=3.1";
+import { crearMotor } from "./audio.js?v=3.2";
+import { crearRastreador } from "./manos.js?v=3.2";
 // El «?v=» de cada import es para el teléfono, no para el código: Pages deja
 // cada módulo diez minutos en la caché, y el 18-oct-2026 Mauro probó la 3.0
 // con la 2.1 todavía adentro. Al cambiar un módulo, sube el «?v=» en TODOS los
 // imports de public/gestos/ y en gestos.html, o se mezclan versiones.
-import { crearInstrumento, VERSION as VERSION_INSTRUMENTO } from "./instrumento.js?v=3.1";
-import { CROMATICA, ESCALAS, LATINO } from "./musica.js?v=3.1";
+import { crearInstrumento, VERSION as VERSION_INSTRUMENTO } from "./instrumento.js?v=3.2";
+import { CROMATICA, ESCALAS, LATINO } from "./musica.js?v=3.2";
 
-export const VERSION = "gestos-pagina 3.1";
+export const VERSION = "gestos-pagina 3.2";
 
 const $ = (id) => document.getElementById(id);
 
@@ -64,7 +64,10 @@ $("escala").value  = guardados.escala  ?? "pentaMenor";
 $("octava").value  = guardados.octava  ?? 3;
 $("octavas").value = guardados.octavas ?? 2;
 $("latino").checked = guardados.latino ?? false;
-$("manoNota").value = guardados.manoNota ?? "derecha";
+// La mano de la nota guardada vale sólo desde el esquema 2 (gestos 3.2): antes
+// se guardaba «derecha» sin que nadie la hubiera elegido, y la izquierda pasó
+// a ser la de la nota por defecto.
+$("manoNota").value = (guardados.esquema >= 2 && guardados.manoNota) || "izquierda";
 $("iman").value = guardados.iman ?? 0;
 $("afinacion").value = guardados.afinacionLa ?? 440;
 $("afinacionVal").textContent = $("afinacion").value;
@@ -79,6 +82,7 @@ function ajustesActuales() {
     manoNota: $("manoNota").value === "izquierda" ? "izquierda" : "derecha",
     iman: Math.max(0, Math.min(1, Number($("iman").value) || 0)),
     afinacionLa: Number($("afinacion").value) || 440,
+    esquema: 2,
   };
 }
 
@@ -121,6 +125,7 @@ function mostrar(e) {
   // y la que decide si hace falta una aplicación nativa (GESTOS.md § 5).
   const lat = motor.latencia;
   if (lat) partes.push(`audio ${Math.round(lat * 1000)} ms`);
+  if (rastreador && rastreador.msReconocer) partes.push(`reconoce ${rastreador.msReconocer} ms`);
   lecturaDatos.textContent = partes.join(" · ");
 }
 
@@ -144,7 +149,7 @@ $("empezar").addEventListener("click", async () => {
     if (video.videoWidth) { lienzo.width = video.videoWidth; lienzo.height = video.videoHeight; }
 
     tapa.style.display = "none";
-    anotar("ok", "cámara y audio listos");
+    anotar("ok", `cámara y audio listos · modelo en ${rastreador.delegado} · cámara a ${video.videoWidth}×${video.videoHeight}`);
   } catch (e) {
     boton.disabled = false;
     boton.textContent = "Reintentar";

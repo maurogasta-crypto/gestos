@@ -11,9 +11,9 @@
 // idea del bandoneón de src/audio/engine.js, aligerada para tiempo real.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { frecuenciaDe } from "./musica.js?v=3.1";
+import { frecuenciaDe } from "./musica.js?v=3.2";
 
-export const VERSION = "gestos-audio 1.2";
+export const VERSION = "gestos-audio 1.3";
 
 // Parciales de la voz principal: armónico, volumen relativo, desafinación en
 // cents entre las dos lengüetas.
@@ -39,7 +39,10 @@ export function crearMotor({ la = 440 } = {}) {
   //    la persona toque la pantalla, o los navegadores lo dejan suspendido.
   function construir() {
     if (listo) return;
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // «interactive» es lo que da el navegador por defecto, pero dicho en voz
+    // alta: un instrumento pide el búfer más chico que haya.
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    try { ctx = new Ctx({ latencyHint: "interactive" }); } catch (e) { ctx = new Ctx(); }
 
     compresor = ctx.createDynamicsCompressor();
     compresor.threshold.value = -18;
@@ -189,12 +192,24 @@ export function crearMotor({ la = 440 } = {}) {
     param.setTargetAtTime(valor, t, tau);
   }
 
-  // altura: MIDI con decimales. Una constante de tiempo de 10 ms une los
-  // cuadros de la cámara (cada 33 ms) sin escalones audibles y sin retrasar.
-  function altura(midi) {
+  // altura: MIDI con decimales, y en cuánto tiempo llegar (`dura`, en s).
+  //
+  // Hasta la 1.2 la altura se fijaba en 10 ms y se quedaba quieta hasta el
+  // cuadro siguiente: con la cámara a 15–30 cuadros por segundo eso es una
+  // ESCALERA, y se oía como teclas. Mauro: «debería ser más como ir corriéndose
+  // en un violín». Ahora se desliza en rampa exponencial —una recta en la
+  // altura, no en los hertz— hasta el valor nuevo, durante lo que tardó en
+  // llegar el cuadro: cuando llega el siguiente, el anterior recién termina.
+  function altura(midi, dura = 0.010) {
     if (!listo) return;
     const f = frecuenciaDe(midi, afinacion);
-    for (const { osc, armonico } of voz.oscs) seguir(osc.frequency, f * armonico, 0.010);
+    const t = ahora();
+    for (const { osc, armonico } of voz.oscs) {
+      const p = osc.frequency;
+      if (p.cancelAndHoldAtTime) p.cancelAndHoldAtTime(t);
+      else { p.cancelScheduledValues(t); p.setValueAtTime(p.value, t); }
+      p.exponentialRampToValueAtTime(Math.max(1, f * armonico), t + dura);
+    }
     voz.midi = midi;
   }
 
