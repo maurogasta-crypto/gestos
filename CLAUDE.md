@@ -94,7 +94,7 @@ y que la documentación diga la verdad después del cambio.
   **Si se toca algo acá, se toca allá en la misma tanda** — si no, divergen en
   silencio, que es lo que `general:un-dato-dos-lugares` describe.
 - **El banco de pruebas vive en Harmonía** (`pruebas/gestos.mjs`, `npm run
-  prueba`, 8 casos). Acá no hay `npm` a propósito. Se corre allá antes de copiar.
+  prueba`, 17 casos). Acá no hay `npm` a propósito. Se corre allá antes de copiar.
 - **Que el JavaScript parsee antes de entregar** (`node --check`): un error de
   sintaxis en un módulo ES deja la página en blanco, sin nada que explique por qué.
 - **Cada archivo de `gestos/` lleva su sello `VERSION`.** Si se cambia el

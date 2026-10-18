@@ -10,7 +10,7 @@ import { crearRastreador } from "./manos.js";
 import { crearInstrumento } from "./instrumento.js";
 import { CROMATICA, ESCALAS, LATINO } from "./musica.js";
 
-export const VERSION = "gestos-pagina 2.0";
+export const VERSION = "gestos-pagina 3.0";
 
 const $ = (id) => document.getElementById(id);
 const AJUSTES_GUARDADOS = "harmonia_gestos_ajustes_v1";
@@ -57,7 +57,8 @@ $("escala").value  = guardados.escala  ?? "pentaMenor";
 $("octava").value  = guardados.octava  ?? 3;
 $("octavas").value = guardados.octavas ?? 2;
 $("latino").checked = guardados.latino ?? false;
-$("acomp").checked  = guardados.acompanamiento ?? true;
+$("manoNota").value = guardados.manoNota ?? "derecha";
+$("iman").value = guardados.iman ?? 0;
 $("afinacion").value = guardados.afinacionLa ?? 440;
 $("afinacionVal").textContent = $("afinacion").value;
 
@@ -68,7 +69,8 @@ function ajustesActuales() {
     octava: Number($("octava").value) || 3,
     octavas: Math.max(1, Math.min(4, Number($("octavas").value) || 2)),
     latino: $("latino").checked,
-    acompanamiento: $("acomp").checked,
+    manoNota: $("manoNota").value === "izquierda" ? "izquierda" : "derecha",
+    iman: Math.max(0, Math.min(1, Number($("iman").value) || 0)),
     afinacionLa: Number($("afinacion").value) || 440,
   };
 }
@@ -81,11 +83,11 @@ function aplicar() {
   if (!instrumento) return;
   instrumento.ajustar({
     tonica: a.tonica, escala: a.escala, octava: a.octava, octavas: a.octavas,
-    latino: a.latino, acompanamiento: a.acompanamiento,
+    latino: a.latino, manoNota: a.manoNota, iman: a.iman,
   });
 }
 
-for (const id of ["tonica","escala","octava","octavas","latino","acomp","afinacion"]) {
+for (const id of ["tonica","escala","octava","octavas","latino","manoNota","iman","afinacion"]) {
   $(id).addEventListener("change", aplicar);
 }
 $("afinacion").addEventListener("input", () => { $("afinacionVal").textContent = $("afinacion").value; });
@@ -105,10 +107,13 @@ function mostrar(e) {
   lecturaNota.textContent = e.etiqueta || "—";
   lecturaNota.style.color = e.sonando ? (e.color || "#fff") : "#555";
   const partes = [
-    e.sonando ? "sonando" : "en silencio",
+    e.sonando ? `sonando · volumen ${Math.round(Math.sqrt(e.nivel || 0) * 100)} %` : "en silencio",
     `${e.fps || 0} cuadros/s`,
   ];
-  if (e.acorde) partes.push("acorde sostenido");
+  // La latencia del audio, a la vista: es la mitad del retraso que se siente
+  // y la que decide si hace falta una aplicación nativa (GESTOS.md § 5).
+  const lat = motor.latencia;
+  if (lat) partes.push(`audio ${Math.round(lat * 1000)} ms`);
   lecturaDatos.textContent = partes.join(" · ");
 }
 

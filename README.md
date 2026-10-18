@@ -1,7 +1,8 @@
 # gestos
 
-Instrumento que se toca con las manos frente a la cámara del teléfono. La mano
-derecha elige y hace sonar la nota; la izquierda acompaña con un acorde.
+Instrumento que se toca con las manos frente a la cámara del teléfono, como un
+theremin con colores: una mano da la altura —continua, con todo el cromatismo—
+y la otra el volumen.
 
 **En vivo:** https://maurogasta-crypto.github.io/gestos/
 
@@ -13,14 +14,18 @@ teléfono — `MediaPipe` reconoce las manos ahí adentro.
 
 | Gesto | Qué hace |
 |---|---|
-| Mano derecha, de izquierda a derecha | elige la nota; las franjas de color son el teclado |
-| Pulgar e índice juntos | hace sonar. Separarlos calla. Cuanto más apretado, más vibrato |
-| Subir la mano | abre el brillo |
-| Acercarla a la cámara | sube el volumen |
-| Mano izquierda abierta | suena un acorde del grado donde esté |
-| Mano izquierda cerrada | calla el acorde |
+| Mano de la nota (la derecha, o la izquierda si se elige), de izquierda a derecha | la altura, **sin cortes**: el fondo es un degradé con el color de cada semitono, y las líneas marcadas son la escala |
+| Subirla | abre el brillo |
+| Pulgar e índice juntos | vibrato; cuanto más apretado, más |
+| La otra mano, arriba o abajo | el volumen: arriba fuerte, abajo calla |
+| La otra mano cerrada | calla en el acto |
+| «Imán a la escala» | en 0, glissando puro; al máximo, por notas como antes |
 
-Si las manos salen cambiadas, «Cambiar mano»: la cámara frontal invierte la
+Sin las dos manos a la vista no suena. Desde el 18-oct-2026; hasta entonces la
+derecha caía en franjas y la izquierda sostenía un acorde (`GESTOS.md` de
+Harmonía, § 2).
+
+Si las manos salen cambiadas, «Manos cambiadas»: la cámara frontal invierte la
 imagen y el modelo no siempre acierta de qué lado está cada una.
 
 ## Qué necesita
@@ -59,5 +64,10 @@ archivo que `public/gestos.html`, con otro nombre porque acá es la portada.
 > Por qué existe esta incubadora: en `toromboto/harmonia` Mauro es
 > **colaborador, no dueño**, así que no puede ver con qué cuenta se despliega ni
 > administrar el proyecto cuando algo falle. Es `harmonia:H1` en el panel.
+
+**Ojo, desde el 18-oct-2026:** el theremin entró en la copia de Mauro de
+Harmonía, `maurogasta-crypto/harmonia` (con su banco, 17 casos), y no en
+`toromboto/harmonia`, al que esta sesión no llega. Hasta que entre allá con un
+pull request desde esa copia, la de toromboto toca por notas.
 
 La documentación completa del instrumento está en `GESTOS.md` de Harmonía.

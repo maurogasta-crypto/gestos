@@ -8,7 +8,7 @@
 // MediaPipe llega por CDN como módulo ES. No hay npm ni build en esta página.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const VERSION = "gestos-manos 1.2";
+export const VERSION = "gestos-manos 1.3";
 
 const CDN    = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const BUNDLE = `${CDN}/vision_bundle.mjs`;
@@ -42,7 +42,7 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 // Filtro de una euro simplificado: cuanto más rápido se mueve la mano, menos
 // se la suaviza. Un promedio fijo o tiembla en reposo o llega tarde al ataque;
 // esto no hace ni una cosa ni la otra.
-function crearSuavizador({ minCorte = 1.2, beta = 0.02, dCorte = 1.0 } = {}) {
+export function crearSuavizador({ minCorte = 1.2, beta = 0.02, dCorte = 1.0 } = {}) {
   let x = null, dx = 0, tPrev = null;
   const alfa = (corte, dt) => {
     const tau = 1 / (2 * Math.PI * corte);
@@ -110,10 +110,13 @@ export function crearRastreador({
   let onCuadro = null;
   let fps = 0, tFps = 0, cuadros = 0;
 
-  const suaves = {
-    derecha: { x: crearSuavizador(), y: crearSuavizador(), palmo: crearSuavizador({ minCorte: 0.8 }) },
-    izquierda: { x: crearSuavizador(), y: crearSuavizador(), palmo: crearSuavizador({ minCorte: 0.8 }) },
-  };
+  // beta 3 en la posición, desde gestos-manos 1.3 (18-oct-2026). Con 0,02
+  // el filtro casi no se abría al mover la mano —la velocidad va en pantallas
+  // por segundo, no en píxeles— y quedaba un pasabajos fijo de 1,2 Hz: 123 ms
+  // de retraso en un glissando de una pantalla por segundo. Con 3 son 25 ms, y
+  // el temblor en reposo es el mismo (1,6 cents). Lo mide el banco.
+  const nuevo = () => ({ x: crearSuavizador({ beta: 3 }), y: crearSuavizador({ beta: 3 }), palmo: crearSuavizador({ minCorte: 0.8 }) });
+  const suaves = { derecha: nuevo(), izquierda: nuevo() };
 
   async function iniciar() {
     const { FilesetResolver, HandLandmarker } = await cargarMediapipe();

@@ -8,7 +8,7 @@
 // acá se actualiza a mano — está anotado en GESTOS.md.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const VERSION = "gestos-musica 1.0";
+export const VERSION = "gestos-musica 1.1";
 
 // ─── Colores tonales (copia de la paleta oficial de src/App.jsx) ─────────────
 export const NC = {
@@ -81,6 +81,46 @@ export function zonaDe(x, cantidad) {
   const bruto = x / ancho;
   const i = Math.max(0, Math.min(cantidad - 1, Math.floor(bruto)));
   return { indice: i, dentro: bruto - i, ancho };
+}
+
+// ─── El diapasón continuo (desde gestos-musica 1.1, 18-oct-2026) ─────────────
+// Pedido de Mauro: «el pasaje en la pantalla debería ser continuo y no cortado
+// por nota, y tener todo el cromatismo». La mano ya no cae en una franja: su
+// posición ES la altura, con todos los cents de por medio, como un theremin.
+//
+// Un margen a cada lado, porque la mano no llega al borde del cuadro sin que
+// MediaPipe la pierda: sin margen, la nota de arriba y la de abajo serían las
+// más difíciles de tocar, justo las que cierran el registro.
+export const MARGEN = 0.06;
+
+// x ∈ [0,1] → altura MIDI con decimales (60,5 = un cuarto de tono arriba de DO).
+export function alturaDe(x, base, semitonos, margen = MARGEN) {
+  const k = Math.max(0, Math.min(1, (x - margen) / (1 - 2 * margen)));
+  return base + k * semitonos;
+}
+
+// La vuelta: dónde se dibuja una altura en la pantalla. Es la inversa exacta
+// de alturaDe, y el banco lo comprueba: si no, la línea de una nota quedaría
+// corrida de donde la mano la hace sonar.
+export function posicionDe(midi, base, semitonos, margen = MARGEN) {
+  return margen + ((midi - base) / semitonos) * (1 - 2 * margen);
+}
+
+// El imán: cuánto tira la altura hacia la nota de la escala más cercana.
+// 0 = glissando puro; 1 = el teclado por notas de antes. En el medio, la mano
+// sigue deslizando pero se «apoya» en las notas. Las notas son las de rejilla().
+export function imanar(midi, notas, fuerza) {
+  if (!(fuerza > 0) || !notas || !notas.length) return midi;
+  let cerca = notas[0];
+  for (const n of notas) if (Math.abs(n - midi) < Math.abs(cerca - midi)) cerca = n;
+  return cerca + (midi - cerca) * (1 - Math.min(1, fuerza));
+}
+
+// Una altura con decimales se nombra por su nota más cercana y cuántos cents
+// se aparta: «A3 +12¢». Entre −50 y +50, nunca más.
+export function afinacionDe(midi) {
+  const nota = Math.round(midi);
+  return { nota, cents: Math.round((midi - nota) * 100) };
 }
 
 // Acorde de tres notas construido por grados de la escala (0, 2, 4) sobre el

@@ -13,7 +13,7 @@
 
 import { frecuenciaDe } from "./musica.js";
 
-export const VERSION = "gestos-audio 1.0";
+export const VERSION = "gestos-audio 1.1";
 
 // Parciales de la voz principal: armónico, volumen relativo, desafinación en
 // cents entre las dos lengüetas.
@@ -173,6 +173,39 @@ export function crearMotor({ la = 440 } = {}) {
     }
   }
 
+  // ── La voz continua (gestos-audio 1.1) ───────────────────────────────────
+  // El instrumento ya no toca notas sueltas: la altura y el nivel se mueven
+  // cada cuadro de cámara. notaOn y notaOff quedan para la práctica, que sí
+  // toca notas.
+  //
+  // `cancelAndHoldAtTime` y no `cancelScheduledValues`: el segundo, si corta
+  // una rampa a mitad de camino, hace saltar el valor al punto de partida — un
+  // clic. Y treinta eventos por segundo que nunca se borran son una lista que
+  // crece mientras se toca.
+  function seguir(param, valor, tau) {
+    const t = ahora();
+    if (param.cancelAndHoldAtTime) param.cancelAndHoldAtTime(t);
+    else param.cancelScheduledValues(t);
+    param.setTargetAtTime(valor, t, tau);
+  }
+
+  // altura: MIDI con decimales. Una constante de tiempo de 10 ms une los
+  // cuadros de la cámara (cada 33 ms) sin escalones audibles y sin retrasar.
+  function altura(midi) {
+    if (!listo) return;
+    const f = frecuenciaDe(midi, afinacion);
+    for (const { osc, armonico } of voz.oscs) seguir(osc.frequency, f * armonico, 0.010);
+    voz.midi = midi;
+  }
+
+  // nivel: la ganancia de la voz, 0 a 1. Es el volumen que da la otra mano.
+  function nivel(v) {
+    if (!listo) return;
+    const k = Math.max(0, Math.min(1, v));
+    seguir(voz.salida.gain, k, 0.015);
+    voz.sonando = k > 0.001;
+  }
+
   // ── Los tres controles continuos ─────────────────────────────────────────
   // brillo: altura de la mano  →  apertura del filtro (200 Hz .. 6 kHz)
   function brillo(v) {
@@ -245,6 +278,7 @@ export function crearMotor({ la = 440 } = {}) {
     VERSION,
     despertar, silencio,
     notaOn, notaOff,
+    altura, nivel,
     brillo, volumen, vibrato,
     acordeOn, acordeOff, chasquido,
     set afinacionLa(v) { afinacion = v; },
