@@ -1,0 +1,12 @@
+.gradle/
+build/
+app/build/
+local.properties
+*.jks
+*.keystore
+key.properties
+.idea/
+*.iml
+# El modelo de manos lo baja Gradle (tarea bajarModelo): no se versiona un
+# binario de 7 MB que vive en el servidor de Google.
+app/src/main/assets/hand_landmarker.task

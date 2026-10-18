@@ -9,6 +9,13 @@ Repositorio `maurogasta-crypto/gestos`, público.
 `npm`, sin `package.json`, sin frameworks.** Se edita desde el teléfono, por la
 web de GitHub.
 
+**Salvo `android/`, desde el 18-oct-2026: la APK nativa** (Kotlin, CameraX,
+MediaPipe y un `AudioTrack` propio), pedida por Mauro por la latencia. Ésa sí
+tiene build —Gradle—, la compila `.github/workflows/apk.yml` y la publica en
+el release `ultimo`. Es una traducción de la página, no otra cosa: si cambia
+`musica.js` o `instrumento.js`, cambian `Musica.kt` e `Instrumento.kt` en la
+misma tanda. Detalle en `android/README.md`.
+
 **Es la incubadora.** El instrumento nació en `toromboto/harmonia`, dentro de
 `public/`, y sigue viviendo allá. Acá está la copia publicada, en un repositorio
 del que Mauro **sí es dueño** — en Harmonía es colaborador, y por eso no puede
@@ -47,8 +54,10 @@ y ésa es su mejor propiedad: no hay nada que proteger porque no hay nada.
 | Variable | Qué hace | Tipo | Dónde vive el valor real | Consumida por | Verificado |
 |---|---|---|---|---|---|
 | Login de GitHub | Publicar | credencial de cuenta | Gestor de contraseñas personal de Mauro | Nadie — uso manual | ausencia confirmada en todo el repo, 2026-09-10 |
+| `FIRMA_JKS` / `FIRMA_STORE_PASS` / `FIRMA_KEY_PASS` / `FIRMA_ALIAS` | Firmar la APK con una clave propia, para instalar encima de la anterior | secreto de infraestructura | GitHub → Settings → Secrets de este repo, **todavía sin cargar**: hasta entonces cada corrida firma con una clave de depuración nueva | `.github/workflows/apk.yml` | 2026-10-18 |
 
-**El workflow `pages.yml` no consume ningún secreto:** el token se lo da GitHub
+**El workflow `pages.yml` no consume ningún secreto** (`apk.yml` usa los
+`FIRMA_*` si están, y si no, firma con la de depuración y lo avisa): el token se lo da GitHub
 para esa corrida. Si algún día hiciera falta uno de verdad, el valor lo carga
 Mauro a mano en Settings → Secrets, nunca un chat, y esta tabla se completa en
 la misma tanda.
@@ -106,6 +115,10 @@ y que la documentación diga la verdad después del cambio.
   de Pages para los push hechos por una app, y todos los push de un agente son
   de esa clase: sin él, una tanda no llega nunca al teléfono y parece que el
   despliegue no hizo nada. Es la lección que ya se pagó en el panel.
+- **La APK se verifica con `cd android && ANDROID_HOME=/opt/sdk ./gradlew
+  test assembleRelease lintRelease`** (12 casos, lint sin errores) antes de
+  subir. Su sello es `versionName` de `android/app/build.gradle.kts`
+  (`gestos-apk-N`): sube en cada tanda que toque `android/`.
 - **Nada de credenciales del lado del cliente**, nunca. Hoy es fácil: no hay
   ninguna en todo el proyecto.
 

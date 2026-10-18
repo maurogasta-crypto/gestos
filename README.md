@@ -27,6 +27,12 @@ Harmonía, § 2).
 Si las manos salen cambiadas, «Manos cambiadas»: la cámara frontal invierte la
 imagen y el modelo no siempre acierta de qué lado está cada una.
 
+## La APK nativa
+
+Desde el 18-oct-2026 el mismo instrumento existe como aplicación de Android,
+para bajar la latencia: https://github.com/maurogasta-crypto/gestos/releases/tag/ultimo
+(`gestos.apk`). El código está en `android/` y se explica en `android/README.md`.
+
 ## Qué necesita
 
 | | |
