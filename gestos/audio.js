@@ -11,9 +11,9 @@
 // idea del bandoneón de src/audio/engine.js, aligerada para tiempo real.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { frecuenciaDe } from "./musica.js";
+import { frecuenciaDe } from "./musica.js?v=3.1";
 
-export const VERSION = "gestos-audio 1.1";
+export const VERSION = "gestos-audio 1.2";
 
 // Parciales de la voz principal: armónico, volumen relativo, desafinación en
 // cents entre las dos lengüetas.

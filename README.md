@@ -1,8 +1,8 @@
 # gestos
 
 Instrumento que se toca con las manos frente a la cámara del teléfono, como un
-theremin con colores: una mano da la altura —continua, con todo el cromatismo—
-y la otra el volumen.
+theremin con colores: una mano sube y baja la nota —continua, con todo el
+cromatismo— y la otra el volumen. El sello de la versión se ve al pie.
 
 **En vivo:** https://maurogasta-crypto.github.io/gestos/
 
@@ -14,8 +14,8 @@ teléfono — `MediaPipe` reconoce las manos ahí adentro.
 
 | Gesto | Qué hace |
 |---|---|
-| Mano de la nota (la derecha, o la izquierda si se elige), de izquierda a derecha | la altura, **sin cortes**: el fondo es un degradé con el color de cada semitono, y las líneas marcadas son la escala |
-| Subirla | abre el brillo |
+| Mano de la nota (la derecha, o la izquierda si se elige), arriba o abajo | sube o baja la nota, **sin cortes**: el fondo es un degradé con el color de cada semitono, y las líneas marcadas son la escala |
+| Acercarla a la cámara | abre el brillo |
 | Pulgar e índice juntos | vibrato; cuanto más apretado, más |
 | La otra mano, arriba o abajo | el volumen: arriba fuerte, abajo calla |
 | La otra mano cerrada | calla en el acto |
@@ -66,7 +66,7 @@ archivo que `public/gestos.html`, con otro nombre porque acá es la portada.
 > administrar el proyecto cuando algo falle. Es `harmonia:H1` en el panel.
 
 **Ojo, desde el 18-oct-2026:** el theremin entró en la copia de Mauro de
-Harmonía, `maurogasta-crypto/harmonia` (con su banco, 17 casos), y no en
+Harmonía, `maurogasta-crypto/harmonia` (con su banco, 19 casos), y no en
 `toromboto/harmonia`, al que esta sesión no llega. Hasta que entre allá con un
 pull request desde esa copia, la de toromboto toca por notas.
 

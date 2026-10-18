@@ -92,7 +92,7 @@
 <body>
 
 <h1><span class="a">Har</span><span class="b">mo</span><span class="c">nía</span> · Gestos</h1>
-<p class="sub">Las manos frente a la cámara. Una da la nota, sin cortes; la otra, el volumen.</p>
+<p class="sub">Las manos frente a la cámara, de arriba a abajo. Una sube y baja la nota, sin cortes; la otra, el volumen.</p>
 
 <div class="escena">
   <video id="video" playsinline muted autoplay></video>
@@ -134,9 +134,9 @@
   <summary>Cómo se toca</summary>
   <p style="font-size:.9rem;color:var(--tenue)">
     <strong style="color:var(--texto)">La mano de la nota</strong> (la derecha, salvo que elijas la izquierda).<br>
-    Moverla de izquierda a derecha cambia la altura sin cortes, con todos los semitonos y lo que
-    hay entre ellos: el fondo es un degradé con el color de cada nota en su lugar, y las líneas
-    marcadas son las notas de la escala. Subirla abre el brillo; apretar pulgar e índice, vibrato.
+    Subirla sube la nota y bajarla la baja, sin cortes, con todos los semitonos y lo que hay entre
+    ellos: el fondo es un degradé con el color de cada nota en su lugar, y las líneas marcadas son
+    las notas de la escala. Acercarla a la cámara abre el brillo; apretar pulgar e índice, vibrato.
     Con el «Imán a la escala» la mano se apoya en esas notas: en cero es glissando puro, al máximo
     toca por notas.
   </p>
@@ -155,6 +155,7 @@
   Nada de esto sube fotos ni video a ningún lado: <code>MediaPipe</code> corre entero en el
   navegador, y el instrumento no le habla a ningún servidor: no hay nada que salga del
   teléfono. La documentación está en <code>GESTOS.md</code>.
+  · <span id="sello"></span>
   · <a href="./">Volver a Harmonía</a>
 </p>
 
@@ -162,6 +163,6 @@
      en la raíz de un dominio. Así anda igual ahí y en un GitHub Pages de
      proyecto (usuario.github.io/repo/), que es donde se puede probar sin
      depender de la cuenta de Vercel que nadie sabe cuál es (harmonia:H1). -->
-<script type="module" src="./gestos/pagina.js"></script>
+<script type="module" src="./gestos/pagina.js?v=3.1"></script>
 </body>
 </html>

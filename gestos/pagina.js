@@ -5,14 +5,21 @@
 // que el instrumento devuelve. Ninguna decisión musical vive acá.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { crearMotor } from "./audio.js";
-import { crearRastreador } from "./manos.js";
-import { crearInstrumento } from "./instrumento.js";
-import { CROMATICA, ESCALAS, LATINO } from "./musica.js";
+import { crearMotor } from "./audio.js?v=3.1";
+import { crearRastreador } from "./manos.js?v=3.1";
+// El «?v=» de cada import es para el teléfono, no para el código: Pages deja
+// cada módulo diez minutos en la caché, y el 18-oct-2026 Mauro probó la 3.0
+// con la 2.1 todavía adentro. Al cambiar un módulo, sube el «?v=» en TODOS los
+// imports de public/gestos/ y en gestos.html, o se mezclan versiones.
+import { crearInstrumento, VERSION as VERSION_INSTRUMENTO } from "./instrumento.js?v=3.1";
+import { CROMATICA, ESCALAS, LATINO } from "./musica.js?v=3.1";
 
-export const VERSION = "gestos-pagina 3.0";
+export const VERSION = "gestos-pagina 3.1";
 
 const $ = (id) => document.getElementById(id);
+
+// El sello a la vista: es lo que dice qué versión quedó en el teléfono.
+document.getElementById("sello").textContent = VERSION_INSTRUMENTO;
 const AJUSTES_GUARDADOS = "harmonia_gestos_ajustes_v1";
 
 const video = $("video");

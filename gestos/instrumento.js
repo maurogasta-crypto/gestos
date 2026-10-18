@@ -9,6 +9,10 @@
 // mano da la ALTURA, continua y con todo el cromatismo, y la otra el VOLUMEN.
 // Lo pidió Mauro: «la mano izquierda o derecha hace la nota y la otra mano
 // hace el volumen, y el pasaje en la pantalla continuo y no cortado por nota».
+// Desde la 3.1 (el mismo día) las dos manos trabajan de ARRIBA A ABAJO:
+// «la mano derecha tiene que subir y bajar el tono, ambas subiendo y bajando
+// las manos». Subir la mano de la nota es subir la nota; la 3.0 la leía de
+// izquierda a derecha.
 // Hasta la 2.1 la derecha caía en franjas de una escala, el pellizco hacía
 // sonar y la izquierda abierta sostenía un acorde: el acorde se fue, porque
 // la mano que lo tocaba ahora es la del volumen.
@@ -20,9 +24,9 @@
 
 import {
   rejilla, midiDe, colorDe, etiquetaDe, alturaDe, posicionDe, imanar, afinacionDe, LATINO, nombreDe,
-} from "./musica.js";
+} from "./musica.js?v=3.1";
 
-export const VERSION = "gestos-instrumento 3.0";
+export const VERSION = "gestos-instrumento 3.1";
 
 // El pellizco de la mano de la altura ya no hace sonar: da vibrato. Cuanto más
 // apretado, más tiembla — el instrumento responde a la presión, no sólo a la
@@ -101,9 +105,11 @@ export function crearInstrumento({ video, canvas, motor, ajustes = {}, alEstado 
       // La altura se mueve aunque no suene: así, cuando la otra mano abre el
       // volumen, entra ya en la nota a la que se apuntó, sin un glissando
       // desde la última que sonó.
-      altura = imanar(alturaDe(mn.x, base, semitonos), guias, cfg.iman);
+      // 1 − y: en la imagen la y crece hacia abajo, y subir la mano es subir la nota.
+      altura = imanar(alturaDe(1 - mn.y, base, semitonos), guias, cfg.iman);
       motor.altura(altura);
-      motor.brillo(1 - mn.y);
+      // El brillo pasó a la cercanía: la altura de la mano ya es la nota.
+      motor.brillo(mn.cercania ?? 0.5);
       const presion = Math.max(0, Math.min(1, (PELLIZCO_VIBRATO - mn.pellizco) / 0.45));
       motor.vibrato(presion * 0.8);
     } else {
@@ -120,12 +126,11 @@ export function crearInstrumento({ video, canvas, motor, ajustes = {}, alEstado 
     const w = canvas.width, h = canvas.height;
     ctx2d.clearRect(0, 0, w, h);
 
-    // El fondo es UN degradé con el color tonal de cada semitono en su lugar:
-    // entre dos notas, el color también está a mitad de camino. Se enciende
-    // con el volumen.
-    const x0 = posicionDe(base, base, semitonos) * w;
-    const x1 = posicionDe(base + semitonos, base, semitonos) * w;
-    const fondo = ctx2d.createLinearGradient(x0, 0, x1, 0);
+    // El fondo es UN degradé, de abajo (grave) hacia arriba (agudo), con el
+    // color tonal de cada semitono en su lugar: entre dos notas, el color
+    // también está a mitad de camino. Se enciende con el volumen.
+    const yDe = (midi) => (1 - posicionDe(midi, base, semitonos)) * h;
+    const fondo = ctx2d.createLinearGradient(0, yDe(base), 0, yDe(base + semitonos));
     for (let i = 0; i <= semitonos; i++) fondo.addColorStop(i / semitonos, colorDe(base + i));
     ctx2d.globalAlpha = 0.16 + 0.5 * nivel;
     ctx2d.fillStyle = fondo;
@@ -134,34 +139,37 @@ export function crearInstrumento({ video, canvas, motor, ajustes = {}, alEstado 
 
     // Las guías: una línea por semitono, más marcada en las notas de la escala.
     // Son referencias para apuntar, no fronteras: la mano pasa por encima.
-    ctx2d.textAlign = "center";
-    ctx2d.font = "12px system-ui, sans-serif";
+    ctx2d.textAlign = "left";
+    ctx2d.textBaseline = "middle";
+    ctx2d.font = "11px system-ui, sans-serif";
     for (let i = 0; i <= semitonos; i++) {
       const midi = base + i;
-      const x = posicionDe(midi, base, semitonos) * w;
+      const y = yDe(midi);
       const enEscala = guias.includes(midi);
       ctx2d.strokeStyle = enEscala ? "rgba(255,255,255,0.38)" : "rgba(255,255,255,0.10)";
       ctx2d.lineWidth = enEscala ? 2 : 1;
-      ctx2d.beginPath(); ctx2d.moveTo(x, 0); ctx2d.lineTo(x, h); ctx2d.stroke();
+      ctx2d.beginPath(); ctx2d.moveTo(0, y); ctx2d.lineTo(w, y); ctx2d.stroke();
       if (enEscala) {
         ctx2d.fillStyle = "rgba(255,255,255,0.75)";
         const n = nombreDe(midi);
-        ctx2d.fillText(cfg.latino ? (LATINO[n] || n) : n, x, 16);
+        ctx2d.fillText(cfg.latino ? (LATINO[n] || n) : n, 20, y - 7);
       }
     }
 
-    // El cursor de la altura: donde está, exactamente, con sus cents.
+    // El cursor de la altura: una línea a la altura exacta, con su nombre.
     if (altura !== null) {
-      const x = posicionDe(altura, base, semitonos) * w;
+      const y = yDe(altura);
       const a = afinacionDe(altura);
       ctx2d.strokeStyle = sonando() ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.4)";
       ctx2d.lineWidth = 3;
-      ctx2d.beginPath(); ctx2d.moveTo(x, 24); ctx2d.lineTo(x, h); ctx2d.stroke();
+      ctx2d.beginPath(); ctx2d.moveTo(0, y); ctx2d.lineTo(w, y); ctx2d.stroke();
       ctx2d.fillStyle = "#fff";
       ctx2d.font = "26px system-ui, sans-serif";
-      ctx2d.textAlign = x < w * 0.15 ? "left" : x > w * 0.85 ? "right" : "center";
-      ctx2d.fillText(etiquetaDe(a.nota, cfg.latino), x, h - 14);
+      ctx2d.textAlign = "center";
+      ctx2d.textBaseline = y < 40 ? "top" : "bottom";
+      ctx2d.fillText(etiquetaDe(a.nota, cfg.latino), w / 2, y < 40 ? y + 6 : y - 6);
     }
+    ctx2d.textBaseline = "alphabetic";
 
     // El volumen, como una barra en el borde de la mano que lo da.
     if (mv) {
