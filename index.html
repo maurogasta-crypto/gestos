@@ -85,6 +85,8 @@
   .bitacora .ok{color:#7fd88f}
   .bitacora .aviso{color:#ffcc66}
 
+  .manual{font-size:.9rem;color:var(--tenue);margin:10px 0}
+  .manual strong{color:var(--texto)}
   .nota-al-pie{color:var(--tenue);font-size:.78rem;margin-top:18px;border-top:1px solid var(--borde);padding-top:12px}
   .nota-al-pie code{background:#12142c;padding:1px 5px;border-radius:5px;font-size:.9em}
 </style>
@@ -113,6 +115,20 @@
   <button id="intercambiar">Manos cambiadas</button>
 </div>
 
+<details open id="manual">
+  <summary>Cómo se usa</summary>
+  <p class="manual"><strong>La idea</strong><br>Un instrumento que se toca con las manos frente a la cámara, como un theremin con colores. Una mano dice qué nota; la otra, cuánto suena.</p>
+  <p class="manual"><strong>Antes de empezar</strong><br>Teléfono parado, a un metro, con buena luz. Que se vean las dos manos y que no haya otras manos atrás.</p>
+  <p class="manual"><strong>Mano izquierda: la nota</strong><br>Subila y la nota sube; bajala y baja. Va sin cortes, como un dedo que corre por la cuerda de un violín. Cada color es una nota; las líneas marcadas son las notas de la escala, para apuntar.</p>
+  <p class="manual"><strong>Mano derecha: el volumen</strong><br>Arriba suena fuerte, abajo no suena. Cerrar el puño calla en el acto. Sin las dos manos a la vista, no suena nada.</p>
+  <p class="manual"><strong>Vibrato</strong><br>Juntá el pulgar y el índice de la mano de la nota: la nota tiembla. Cuanto más apretado, más.</p>
+  <p class="manual"><strong>Lo que no hace nada</strong><br>Acercar o alejar las manos, o moverlas de costado. Sólo cuenta subir y bajar.</p>
+  <p class="manual"><strong>Los botones</strong><br>Silencio: calla todo.<br>Manos cambiadas: la nota pasa a la mano derecha y el volumen a la izquierda.<br>La escala y las manos (abajo): la tónica, la escala (las líneas marcadas), cuántas octavas y el imán. Con el imán en cero la nota corre libre; al máximo cae justo en las notas de la escala, como un teclado.</p>
+  <p class="manual"><strong>La línea gris</strong><br>Cuánto tarda cada parte (cámara, reconocer la mano, sonido). No hace falta para tocar: sirve para mejorar el instrumento. Si algo anda lento, mandá una captura de esa línea.</p>
+  <p class="manual">Hay también una aplicación para Android, más rápida:
+    <a href="https://github.com/maurogasta-crypto/gestos/releases/download/ultimo/gestos.apk">gestos.apk</a>.</p>
+</details>
+
 <details open>
   <summary>La escala y las manos</summary>
   <div class="campo"><label for="manoNota">La nota con la mano</label><select id="manoNota"><option value="izquierda">izquierda</option><option value="derecha">derecha</option></select></div>
@@ -130,27 +146,7 @@
   <div class="bitacora" id="bitacora">Acá aparece lo que pasa con la cámara y el audio.</div>
 </details>
 
-<details>
-  <summary>Cómo se toca</summary>
-  <p style="font-size:.9rem;color:var(--tenue)">
-    <strong style="color:var(--texto)">La mano de la nota</strong> (la izquierda, salvo que elijas la derecha).<br>
-    Subirla sube la nota y bajarla la baja, sin cortes, con todos los semitonos y lo que hay entre
-    ellos: el fondo es un degradé con el color de cada nota en su lugar, y las líneas marcadas son
-    las notas de la escala. Apretar pulgar e índice da vibrato. Acercarla o alejarla de la cámara no cambia nada.
-    Con el «Imán a la escala» la mano se apoya en esas notas: en cero es glissando puro, al máximo
-    toca por notas.
-  </p>
-  <p style="font-size:.9rem;color:var(--tenue)">
-    <strong style="color:var(--texto)">La otra mano — el volumen.</strong><br>
-    Arriba suena fuerte, abajo calla; el puño calla en el acto. Sin las dos manos a la vista no
-    suena nada. La barra del costado muestra el volumen.
-  </p>
-  <p style="font-size:.9rem;color:var(--tenue)">
-    <strong style="color:var(--texto)">Qué mano es cuál</strong> lo decide el lado de la pantalla donde
-    se ve: la de la izquierda de la pantalla es la izquierda. «Manos cambiadas» lo da vuelta, para
-    tocar con la nota en la derecha.
-  </p>
-</details>
+
 
 <p class="nota-al-pie">
   Nada de esto sube fotos ni video a ningún lado: <code>MediaPipe</code> corre entero en el

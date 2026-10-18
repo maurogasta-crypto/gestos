@@ -16,6 +16,7 @@ import android.widget.CheckBox
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.SeekBar
+import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.ComponentActivity
@@ -95,14 +96,41 @@ class MainActivity : ComponentActivity() {
         val fila = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         fun boton(t: String, al: () -> Unit) = Button(this).apply { text = t; isAllCaps = false; setOnClickListener { al() } }
             .also { fila.addView(it, LinearLayout.LayoutParams(0, -2, 1f)) }
-        boton("Silencio") { instrumento.silencio() }
-        boton("Manos cambiadas") {
+        boton(Manual.BOTONES[0]) { instrumento.silencio() }
+        boton(Manual.BOTONES[1]) {
             camara.cambiadas = !camara.cambiadas
             getSharedPreferences(Preferencias.ARCHIVO, MODE_PRIVATE).edit().putBoolean("cambiadas", camara.cambiadas).apply()
         }
-        boton("Ajustes") { mostrarAjustes() }
+        boton(Manual.BOTONES[2]) { mostrarAjustes() }
+        // El manual: un «?» chico al final de la fila.
+        fila.addView(Button(this).apply { text = "?"; setOnClickListener { mostrarManual() } },
+            LinearLayout.LayoutParams(-2, -2))
         raiz.addView(fila)
         setContentView(raiz)
+    }
+
+    // La primera vez se abre solo: quien instala no sabe todavía que la nota
+    // va en la izquierda y el volumen en la derecha.
+    override fun onResume() {
+        super.onResume()
+        val p = getSharedPreferences(Preferencias.ARCHIVO, MODE_PRIVATE)
+        if (!p.getBoolean("manualVisto", false)) {
+            p.edit().putBoolean("manualVisto", true).apply()
+            mostrarManual()
+        }
+    }
+
+    private fun mostrarManual() {
+        val caja = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(56, 24, 56, 24) }
+        for ((titulo, texto) in Manual.partes) {
+            caja.addView(TextView(this).apply { text = titulo; textSize = 16f; setTypeface(typeface, android.graphics.Typeface.BOLD); setPadding(0, 22, 0, 4) })
+            caja.addView(TextView(this).apply { text = texto; textSize = 15f })
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Cómo se usa")
+            .setView(ScrollView(this).apply { addView(caja) })
+            .setPositiveButton("A tocar", null)
+            .show()
     }
 
     override fun onStart() {

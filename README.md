@@ -71,7 +71,7 @@ archivo que `public/gestos.html`, con otro nombre porque acá es la portada.
 > administrar el proyecto cuando algo falle. Es `harmonia:H1` en el panel.
 
 **Ojo, desde el 18-oct-2026:** el theremin entró en la copia de Mauro de
-Harmonía, `maurogasta-crypto/harmonia` (con su banco, 21 casos), y no en
+Harmonía, `maurogasta-crypto/harmonia` (con su banco, 22 casos), y no en
 `toromboto/harmonia`, al que esta sesión no llega. Hasta que entre allá con un
 pull request desde esa copia, la de toromboto toca por notas.
 

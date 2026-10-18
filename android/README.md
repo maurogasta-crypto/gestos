@@ -25,6 +25,10 @@ pantalla** donde se ve (`Repartir.porLado`, desde gestos-apk-2), no la
 etiqueta del modelo, que con la cámara frontal se equivoca; «Manos
 cambiadas» da vuelta ese reparto.
 
+**El manual** («Cómo se usa», `Manual.kt`) se abre solo la primera vez y
+después con el «?». Es el mismo texto que la página: si cambia uno, cambia el
+otro (el banco de Harmonía compara los títulos).
+
 ## Dónde se gana el tiempo, y cómo se ve
 
 | | La página | La APK |
@@ -60,8 +64,8 @@ sigue.
 ANDROID_HOME=/opt/sdk ./gradlew test assembleRelease lintRelease
 ```
 
-Trece pruebas (`GestosTest.kt`): la teoría, el instrumento, el suavizado y que
-la voz se deslice sin escalones. El modelo de manos (`hand_landmarker.task`,
+Catorce pruebas (`GestosTest.kt`): la teoría, el instrumento, el suavizado, que
+la voz se deslice sin escalones y que el manual nombre cada botón. El modelo de manos (`hand_landmarker.task`,
 el mismo de la página) lo baja Gradle la primera vez y no se versiona.
 
 Sólo arm64: los Redmi del ecosistema lo son, y con los cuatro procesadores la

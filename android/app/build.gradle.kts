@@ -25,7 +25,7 @@ android {
         targetSdk = 35
         // El número de corrida de GitHub: sube en cada tanda y nunca retrocede.
         versionCode = (project.findProperty("codigoVersion") as String?)?.toIntOrNull() ?: 1
-        versionName = "gestos-apk-2"
+        versionName = "gestos-apk-3"
         // Sólo arm64: los tres Redmi del ecosistema lo son, y las librerías de
         // MediaPipe para los cuatro procesadores triplicaban el APK (56 MB).
         ndk { abiFilters += "arm64-v8a" }

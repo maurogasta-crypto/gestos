@@ -190,4 +190,11 @@ class GestosTest {
         val nada = Repartir.porLado(emptyList(), false)
         assertNull(nada.izquierda); assertNull(nada.derecha)
     }
+
+    // ── El manual no puede mentir ───────────────────────────────────────────
+    @Test fun elManualNombraCadaBotonYLasDosManos() {
+        val todo = Manual.partes.joinToString(" ") { it.first + " " + it.second }
+        for (b in Manual.BOTONES) assertTrue("el manual no nombra «$b»", b in todo)
+        for (p in listOf("izquierda", "derecha", "volumen", "imán", "pulgar")) assertTrue("falta «$p»", p in todo)
+    }
 }
