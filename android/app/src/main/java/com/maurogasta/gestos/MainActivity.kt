@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
     private var error: String? = null
 
     private val pedirCamara = registerForActivityResult(ActivityResultContracts.RequestPermission()) { si ->
-        if (si) encender() else datos.text = "Sin permiso de cámara no hay instrumento. Dalo en Ajustes → Aplicaciones → Gestos."
+        if (si) encender() else datos.text = "Sin permiso de cámara no hay instrumento. Dalo en Ajustes → Aplicaciones → Theremin."
     }
 
     override fun onCreate(estado: Bundle?) {

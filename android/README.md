@@ -1,4 +1,9 @@
-# Gestos · la APK nativa
+# Theremin · la APK nativa de gestos
+
+**Desde gestos-apk-4 (2-nov-2026) la app se llama «Theremin»** (Mauro: «le llamaremos
+theremin»). Cambia sólo el nombre que se ve en el teléfono: el paquete sigue siendo
+`com.maurogasta.gestos` —cambiarlo la instalaría como otra app— y el archivo del
+release sigue siendo `gestos.apk`, para que el enlace del panel no se rompa.
 
 El mismo instrumento que la página, como aplicación de Android, para bajar la
 latencia. Lo pidió Mauro el 18-oct-2026: «la latencia sigue siendo mucha».
