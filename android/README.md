@@ -32,7 +32,7 @@ cambiadas» da vuelta ese reparto.
 
 **El manual** («Cómo se usa», `Manual.kt`) se abre solo la primera vez y
 después con el «?». Es el mismo texto que la página: si cambia uno, cambia el
-otro (el banco de Harmonía compara los títulos).
+otro (el banco de BandoMaps compara los títulos).
 
 ## Dónde se gana el tiempo, y cómo se ve
 

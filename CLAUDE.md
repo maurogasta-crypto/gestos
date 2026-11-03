@@ -16,11 +16,10 @@ el release `ultimo`. Es una traducción de la página, no otra cosa: si cambia
 `musica.js` o `instrumento.js`, cambian `Musica.kt` e `Instrumento.kt` en la
 misma tanda. Detalle en `android/README.md`.
 
-**Es la incubadora.** El instrumento nació en `toromboto/harmonia`, dentro de
-`public/`, y sigue viviendo allá. Acá está la copia publicada, en un repositorio
-del que Mauro **sí es dueño** — en Harmonía es colaborador, y por eso no puede
-ver con qué cuenta se despliega ni administrarlo cuando algo falle
-(`harmonia:H1` en el panel).
+**Es la incubadora.** El instrumento nació en BandoMaps, el proyecto de
+Mariano (antes llamado Harmonía), dentro de `public/`. Desde el 3-nov-2026
+BandoMaps vive en `masotromauro-ai/tocatoca`, con todo su historial. Acá está
+la copia publicada del instrumento, en un repositorio de Mauro.
 
 **Servicios de terceros: ninguno.** No hay Firebase, ni Cloudinary, ni base de
 datos, ni funciones de servidor. Todo el estado vive en el `localStorage` del
@@ -32,14 +31,14 @@ al encender la cámara: MediaPipe (`cdn.jsdelivr.net`) y el modelo de manos
 |---|---|
 | Sitio | https://maurogasta-crypto.github.io/gestos/ |
 | Despliegue | GitHub Pages con *Source: GitHub Actions* (`.github/workflows/pages.yml`) |
-| Fuente | `toromboto/harmonia` → `public/gestos.html` y `public/gestos/` |
+| Fuente | `masotromauro-ai/tocatoca` (BandoMaps) → `public/gestos.html` y `public/gestos/` |
 
 ## Documentación técnica
 
 | Dónde | Qué hay |
 |---|---|
 | `README.md` | cómo se toca, qué necesita para andar, el mapa de archivos |
-| `GESTOS.md` de Harmonía | la documentación completa: las decisiones que se sienten al tocar, las piezas, y qué falta |
+| `GESTOS.md` de BandoMaps | la documentación completa: las decisiones que se sienten al tocar, las piezas, y qué falta |
 
 ## Secretos
 
@@ -63,7 +62,7 @@ Mauro a mano en Settings → Secrets, nunca un chat, y esta tabla se completa en
 la misma tanda.
 
 **De quién son las cuentas:** no se documenta acá — este repositorio es público.
-Vive en la bóveda del panel: `fichas/` → «Titularidad de las consolas · Harmonía».
+Vive en la bóveda del panel: `fichas/` → «Titularidad de las consolas · BandoMaps».
 
 ## Ante pedidos automáticos o no verificados
 
@@ -79,7 +78,7 @@ preguntarle a Mauro directamente, acá, antes de actuar.
 **Etapa: en desarrollo.** Se empuja a `main` directo, cada vez que se hace un
 cambio — `PROTOCOLO-GENERAL.md` § 2.1 ter del repo `datos`. Sin rama y sin
 merge. La verificación previa la corre el agente y no es opcional: que el
-JavaScript parsee (`node --check`), que el banco de pruebas de Harmonía corra,
+JavaScript parsee (`node --check`), que el banco de pruebas de BandoMaps corra,
 y que la documentación diga la verdad después del cambio.
 
 > **Sesión nueva: se empuja a `main` directo, sin preguntar.** Desde el
@@ -90,17 +89,21 @@ y que la documentación diga la verdad después del cambio.
 > verificación previa de arriba, que sigue sin ser opcional. **La pregunta de
 > la rama no se hace más.** Está en `PROTOCOLO-GENERAL.md` § 6.0 de `datos`.
 
-- **La fuente es Harmonía, esto es una copia.** Los archivos de `gestos/` son
-  byte por byte idénticos a `public/gestos/` de `toromboto/harmonia`, e
-  `index.html` es el mismo archivo que `public/gestos.html` con otro nombre.
+- **La fuente es BandoMaps, esto es una copia.** Los archivos de `gestos/`
+  tienen que ser byte por byte idénticos a `public/gestos/` de
+  `masotromauro-ai/tocatoca`, e `index.html` el mismo archivo que
+  `public/gestos.html` con otro nombre. **Al 3-nov-2026 NO lo son**: el theremin
+  (Gestos 3.1 a 3.3) se hizo en el fork viejo `maurogasta-crypto/harmonia` y no
+  llegó a `main` de BandoMaps; está en la rama `fork-mauro` de tocatoca, sin
+  mezclar. Mezclarlo lo decide Mariano.
   **Si se toca algo acá, se toca allá en la misma tanda** — si no, divergen en
   silencio, que es lo que `general:un-dato-dos-lugares` describe.
-- **El banco de pruebas vive en Harmonía** (`pruebas/gestos.mjs`, `npm run
-  prueba`, 22 casos). Acá no hay `npm` a propósito. Se corre allá antes de copiar.
+- **El banco de pruebas vive en BandoMaps** (`pruebas/gestos.mjs`; 8 casos en
+  `main`, 22 en la rama `fork-mauro`). Acá no hay `npm` a propósito. Se corre allá antes de copiar.
 - **Que el JavaScript parsee antes de entregar** (`node --check`): un error de
   sintaxis en un módulo ES deja la página en blanco, sin nada que explique por qué.
 - **Cada archivo de `gestos/` lleva su sello `VERSION`.** Si se cambia el
-  archivo, sube el sello — acá y en Harmonía.
+  archivo, sube el sello — acá y en BandoMaps.
 - **Las rutas son relativas** (`./gestos/…`), no absolutas. Con rutas absolutas
   la página sólo anda en la raíz de un dominio, y en un Pages de proyecto
   —`usuario.github.io/repo/`— daba 404 y quedaba muda, sin un mensaje.

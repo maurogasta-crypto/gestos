@@ -22,7 +22,7 @@ teléfono — `MediaPipe` reconoce las manos ahí adentro.
 
 Sin las dos manos a la vista no suena. Desde el 18-oct-2026; hasta entonces la
 derecha caía en franjas y la izquierda sostenía un acorde (`GESTOS.md` de
-Harmonía, § 2).
+BandoMaps, § 2).
 
 Qué mano es cuál lo decide el lado de la pantalla donde se ve; «Manos cambiadas» lo da vuelta: la cámara frontal invierte la
 imagen y el modelo no siempre acierta de qué lado está cada una.
@@ -58,21 +58,17 @@ números con sentido musical.
 
 ## De dónde viene, y la regla que importa
 
-**La fuente es `toromboto/harmonia`**, en `public/gestos.html` y
-`public/gestos/`. Esto es la **incubadora**: el mismo instrumento, en un
-repositorio del que Mauro sí es dueño.
+**La fuente es BandoMaps** (`masotromauro-ai/tocatoca`, el proyecto de Mariano,
+antes llamado Harmonía), en `public/gestos.html` y `public/gestos/`. Esto es la
+**incubadora**: el mismo instrumento, en un repositorio de Mauro.
 
-Los archivos de `gestos/` son **byte por byte idénticos** a los de allá, a
-propósito: así sincronizar es copiar y no comparar. `index.html` es el mismo
-archivo que `public/gestos.html`, con otro nombre porque acá es la portada.
+Los archivos de `gestos/` tienen que ser **byte por byte idénticos** a los de
+allá, a propósito: así sincronizar es copiar y no comparar. `index.html` es el
+mismo archivo que `public/gestos.html`, con otro nombre porque acá es la portada.
 
-> Por qué existe esta incubadora: en `toromboto/harmonia` Mauro es
-> **colaborador, no dueño**, así que no puede ver con qué cuenta se despliega ni
-> administrar el proyecto cuando algo falle. Es `harmonia:H1` en el panel.
+**Ojo, al 3-nov-2026 no lo son:** el theremin se hizo en el fork viejo
+`maurogasta-crypto/harmonia` (con su banco, 22 casos) y no llegó a `main` de
+BandoMaps. Está en la rama `fork-mauro` de tocatoca, sin mezclar; mezclarlo lo
+decide Mariano.
 
-**Ojo, desde el 18-oct-2026:** el theremin entró en la copia de Mauro de
-Harmonía, `maurogasta-crypto/harmonia` (con su banco, 22 casos), y no en
-`toromboto/harmonia`, al que esta sesión no llega. Hasta que entre allá con un
-pull request desde esa copia, la de toromboto toca por notas.
-
-La documentación completa del instrumento está en `GESTOS.md` de Harmonía.
+La documentación completa del instrumento está en `GESTOS.md` de BandoMaps.
